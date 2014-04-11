@@ -1,0 +1,6 @@
+.ycm*
+makefile
+build/*
+tags
+*.swp
+
