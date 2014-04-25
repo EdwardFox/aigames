@@ -3,7 +3,7 @@
 const sf::Time Game::TimePerFrame = sf::seconds(1.f/60.f);
 
 Game::Game() :
-mWindow(sf::VideoMode(1680, 1050, 32), "BlockKeeper")
+mWindow(sf::VideoMode(640, 380, 32), "BlockKeeper")
 , mWorld()
 , mPlayer()
 {
