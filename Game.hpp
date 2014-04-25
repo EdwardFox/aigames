@@ -33,7 +33,7 @@ class Game
         /**
         * @brief Default constructor
         */
-        Game();
+        Game(int width, int height);
 
         /**
         * @brief Entry point for the game to run

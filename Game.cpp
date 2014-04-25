@@ -2,11 +2,12 @@
 
 const sf::Time Game::TimePerFrame = sf::seconds(1.f/60.f);
 
-Game::Game() :
-mWindow(sf::VideoMode(640, 380, 32), "AIGames")
+Game::Game(int width, int height) :
+mWindow(sf::VideoMode(width, height, 32), "AIGames")
 , mWorld()
 , mPlayer()
 {
+    
 }
 
 void Game::run() {
