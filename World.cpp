@@ -39,7 +39,7 @@ void World::createWorld()
     {
         for(int j = 0; j < 10; ++j)
         {
-            sf::Vector2f position(j*BOX_SIZE, 640 + i*BOX_SIZE);
+            sf::Vector2f position(j*BOX_SIZE, i*BOX_SIZE);
             sf::Vector2f size(BOX_SIZE, BOX_SIZE);
             sf::Color fill(255, 255, 255, 255);
             sf::Color outline(0, 0, 0, 255);
