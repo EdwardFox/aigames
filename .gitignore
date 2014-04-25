@@ -3,4 +3,6 @@ makefile
 build/*
 tags
 *.swp
+Debug/
+*.vc*
 
