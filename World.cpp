@@ -7,11 +7,11 @@ mEntities()
     createWorld();
 }
 
-void World::update(sf::Time dt)
+void World::update(sf::Time dt, ActiveInput ai)
 {
     for(const auto& ent : mEntities)
     {
-        ent.second->update(dt);
+        ent.second->update(dt, ai);
     }
 }
 
@@ -35,9 +35,9 @@ std::map<std::string, std::unique_ptr<Entity>>& World::getEntities()
 
 void World::createWorld()
 {
-    for(int i = 0; i < 10; ++i)
+    for(int i = 0; i < 15; ++i)
     {
-        for(int j = 0; j < 10; ++j)
+        for(int j = 0; j < 20; ++j)
         {
             sf::Vector2f position(j*BOX_SIZE, i*BOX_SIZE);
             sf::Vector2f size(BOX_SIZE, BOX_SIZE);

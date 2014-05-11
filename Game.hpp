@@ -4,7 +4,6 @@
 #include <SFML/Graphics.hpp>
 #include "World.hpp"
 #include "Data.hpp"
-#include "Player.hpp"
 
 class Game
 {
@@ -27,7 +26,7 @@ class Game
         * @param key The pressed key
         * @param isPressed Pressed or released
         */
-        void handlePlayerInput(sf::Keyboard::Key key, bool isPressed);
+        void handleInput(sf::Event event);
 
     public:
         /**
@@ -56,10 +55,7 @@ class Game
         */
         World mWorld;
 
-        /**
-        * @brief 
-        */
-        Player mPlayer;
+        ActiveInput mAI;
 
     public:
         /**

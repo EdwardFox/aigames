@@ -22,7 +22,7 @@ class World
         *
         * @param dt Time passed between 2 update ticks
         */
-        void update(sf::Time dt);
+        void update(sf::Time dt, ActiveInput ai);
 
         /**
         * @brief Draws the world and all entities

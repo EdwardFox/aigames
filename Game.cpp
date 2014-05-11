@@ -5,7 +5,7 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f/60.f);
 Game::Game(int width, int height) :
 mWindow(sf::VideoMode(width, height, 32), "AIGames")
 , mWorld()
-, mPlayer()
+, mAI()
 {
     
 }
@@ -30,7 +30,7 @@ void Game::run() {
 
 void Game::update(sf::Time dt)
 {
-    mWorld.update(dt);
+    mWorld.update(dt, mAI);
 }
 
 void Game::render()
@@ -45,16 +45,24 @@ void Game::processInput()
     sf::Event event;
     while(mWindow.pollEvent(event))
     {
-        mPlayer.handleEvent(event);
+        handleInput(event);
 
         if(event.type == sf::Event::Closed)
             mWindow.close();
     }
 }
 
-void Game::handlePlayerInput(sf::Keyboard::Key key, bool isPressed)
+void Game::handleInput(sf::Event event)
 {
-    if(key == sf::Keyboard::W && isPressed)
+    ActiveInput ai;
+
+    ai.mousePos = sf::Mouse::getPosition(mWindow);
+    ai.mouseDown = sf::Mouse::isButtonPressed(sf::Mouse::Left);
+
+    if(event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
+        ai.mouseClicked = true;
     }
+
+    mAI = ai;
 }

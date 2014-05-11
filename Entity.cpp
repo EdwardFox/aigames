@@ -14,8 +14,17 @@ Entity::Entity(const sf::Vector2f position, const sf::Vector2f size, const sf::C
     mShape.setOutlineThickness(1.0f);
 }
 
-void Entity::update(sf::Time dt) 
+void Entity::update(sf::Time dt, ActiveInput ai) 
 {
+    if(ai.mouseDown)
+    {
+        sf::FloatRect rect = mShape.getGlobalBounds();
+
+        if(rect.contains(ai.mousePos.x, ai.mousePos.y))
+        {
+            this->setColor(sf::Color::Red);
+        }
+    }
 }
 
 void Entity::draw(sf::RenderTarget &target) 
@@ -23,3 +32,7 @@ void Entity::draw(sf::RenderTarget &target)
     target.draw(mShape);
 }
 
+void Entity::setColor(sf::Color c) 
+{
+    mShape.setFillColor(c);
+}

@@ -28,7 +28,7 @@ class Entity
         *
         * @param dt Time between 2 update ticks
         */
-        virtual void update(sf::Time dt);
+        virtual void update(sf::Time dt, ActiveInput ai);
 
         /**
         * @brief Draws the entity
@@ -37,9 +37,12 @@ class Entity
         */
         virtual void draw(sf::RenderTarget &target);
 
+        virtual void setColor(sf::Color c);
+
     protected:
         sf::RectangleShape mShape;
 
+    private:
 };
 
 #endif
