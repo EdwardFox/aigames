@@ -4,13 +4,18 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-static const float BOX_SIZE = 50.0f;
+static const float BOX_SIZE = 32.0f;
+static const sf::Color NODE_FREE = sf::Color::White;
+static const sf::Color NODE_BLOCKED = sf::Color(155, 155, 155, 255);
+static const sf::Color NODE_START = sf::Color::Green;
+static const sf::Color NODE_GOAL = sf::Color::Red;
 
-struct ActiveInput
-{
-    sf::Vector2i mousePos = sf::Vector2i(0,0);
-    bool mouseDown = false;
-    bool mouseClicked = false;
+enum class InputState {
+    NONE,
+    ADD,
+    REMOVE,
+    MOVE_START,
+    MOVE_GOAL
 };
 
 #endif

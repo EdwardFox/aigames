@@ -55,7 +55,9 @@ class Game
         */
         World mWorld;
 
-        ActiveInput mAI;
+        InputState inputState;
+
+        Entity* previousEnt;
 
     public:
         /**

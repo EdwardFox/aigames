@@ -15,14 +15,14 @@ class World
         /**
         * @brief Default constructor
         */
-        World();
+        World(int width, int height);
 
         /**
         * @brief Updates the world and all its entities
         *
         * @param dt Time passed between 2 update ticks
         */
-        void update(sf::Time dt, ActiveInput ai);
+        void update(sf::Time dt);
 
         /**
         * @brief Draws the world and all entities
@@ -37,13 +37,15 @@ class World
         * @param x X coordinate
         * @param y Y coordinate
         */
-        void addEntity(std::string key, sf::Vector2f position, sf::Vector2f size, sf::Color fill, sf::Color outline);
+        void addEntity(std::string key, sf::Vector2f position, sf::Vector2f size, sf::Color fill, sf::Color outline, bool isStart, bool isEnd);
 
         std::map<std::string, std::unique_ptr<Entity>>& getEntities();
 
-    private:
+        Entity* getEntityAtPosition(int x, int y);
 
-        void createWorld();
+        void createWorld(int width, int height);
+
+        void deleteWorld();
 
     private:
         /**
