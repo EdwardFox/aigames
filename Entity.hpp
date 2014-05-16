@@ -22,7 +22,7 @@ class Entity
         * @param fill
         * @param outline
         */
-        Entity(const sf::Vector2f position, const sf::Vector2f size, const sf::Color fill, const sf::Color outline, bool isStart, bool isEnd); 
+        Entity(const sf::Vector2f position, const sf::Vector2f size, const sf::Color fill, const sf::Color outline, bool isStart, bool isEndi, bool isWall); 
 
         /**
         * @brief Updates the entity's position and sets the visual representation accordingly
@@ -57,6 +57,11 @@ class Entity
         virtual std::vector<std::string> getNeighbors(bool diagonal = true);
 
         virtual std::string getIndex();
+
+        NodeState state;
+        Entity* parent;
+        float costSoFar;
+        bool isPath;
 
     protected:
         sf::RectangleShape mShape;

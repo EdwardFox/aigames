@@ -1,7 +1,11 @@
 #include "Entity.hpp"
 
 Entity::Entity() :
-mShape()
+state(NodeState::UNVISITED)
+, parent(NULL)
+, costSoFar(0)
+, isPath(false)
+, mShape()
 , wall(false)
 , start(false)
 , end(false)
@@ -9,13 +13,19 @@ mShape()
 }
 
     
-Entity::Entity(const sf::Vector2f position, const sf::Vector2f size, const sf::Color fill, const sf::Color outline, bool isStart, bool isEnd) {
+Entity::Entity(const sf::Vector2f position, const sf::Vector2f size, const sf::Color fill, const sf::Color outline, bool isStart, bool isEnd, bool isWall) {
     mShape.setSize(size);
     mShape.setPosition(position.x, position.y);
     mShape.setFillColor(fill);
     mShape.setOutlineColor(outline);
     mShape.setOutlineThickness(1.0f);
 
+    state = NodeState::UNVISITED;
+    parent = NULL;
+    costSoFar = 0;
+    isPath = false;
+
+    setWall(isWall);
     setStart(isStart);
     setEnd(isEnd);
 

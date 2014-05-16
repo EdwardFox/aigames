@@ -16,6 +16,8 @@ void World::update(sf::Time dt)
     {
         ent.second->update(dt);
     }
+
+    findPath(Algorithm::ASTAR, Heuristic::EUCLIDEAN);
 }
 
 void World::draw(sf::RenderTarget &target) const
@@ -26,9 +28,9 @@ void World::draw(sf::RenderTarget &target) const
     }
 }
 
-void World::addEntity(std::string key, sf::Vector2f position, sf::Vector2f size, sf::Color fill, sf::Color outline, bool isStart, bool isEnd)
+void World::addEntity(std::string key, sf::Vector2f position, sf::Vector2f size, sf::Color fill, sf::Color outline, bool isStart, bool isEnd, bool isWall)
 {
-    mEntities[key] = std::unique_ptr<Entity>(new Entity(position, size, fill, outline, isStart, isEnd));
+    mEntities[key] = std::unique_ptr<Entity>(new Entity(position, size, fill, outline, isStart, isEnd, isWall));
 }
 
 std::map<std::string, std::unique_ptr<Entity>>& World::getEntities()
@@ -51,26 +53,24 @@ void World::createWorld(int width, int height)
             sf::Color outline(0, 0, 0, 255);
             std::string pos = std::to_string((int)position.x) + "_" + std::to_string((int)position.y);
 
+            // Start && End
             if(i == columns/2) {
                 if(j == rows/3) {
-                    addEntity(pos, position, size, fill, outline, true, false);
+                    addEntity(pos, position, size, fill, outline, true, false, false);
                     mStartTile = mEntities.at(pos).get();
                 } else if(j == (int)(rows/1.5)) {
-                    addEntity(pos, position, size, fill, outline, false, true);
+                    addEntity(pos, position, size, fill, outline, false, true, false);
                     mGoalTile = mEntities.at(pos).get();
                 } else {
-                    addEntity(pos, position, size, fill, outline, false, false);
+                    addEntity(pos, position, size, fill, outline, false, false, false);
                 }
             } else {
-                addEntity(pos, position, size, fill, outline, false, false);
+                addEntity(pos, position, size, fill, outline, false, false, false);
             }
         }
     }
 }
 
-void World::deleteWorld() {
-    mEntities.clear();
-}
 
 Entity* World::getEntityAtPosition(int x, int y) {
     //std::cout << "Input: " << x << "x" << y << std::endl;
@@ -107,12 +107,15 @@ void World::setGoalTile(Entity* ent)
 
 void World::findPath(Algorithm alg, Heuristic heu)
 {
+    clearPath();
+
     switch(alg)
     {
         case Algorithm::DIJKSTRA:
             runDijkstra();
             break;
         case Algorithm::ASTAR:
+            runAStar(heu);
             break;
         default:
             break;
@@ -121,120 +124,138 @@ void World::findPath(Algorithm alg, Heuristic heu)
 
 void World::runDijkstra()
 {
-    // Initialize an empty connection
-    std::unique_ptr<Connection> emptyConnection(new Connection());
-    emptyConnection->mFromNode = NULL;
 
-    // Initialize the start record
-    std::unique_ptr<NodeRecord> startRecord(new NodeRecord());
-    startRecord->node = mStartTile->getIndex();
-    startRecord->connection = std::unique_ptr<Connection>(std::move(emptyConnection));
-    startRecord->costSoFar = 0;
+}
 
-    // Initialize the lists
-    PathfindingList open;
-    open.records.push_back(std::move(startRecord));
-    PathfindingList closed;
+void World::runAStar(Heuristic heu)
+{
+    Entity* start = mStartTile;
+    start->state = NodeState::OPEN;
 
-    std::vector<std::unique_ptr<NodeRecord>>::iterator current;
+    std::map<std::string, Entity*> openList;
+    openList[start->getIndex()] = start;
 
-    // Iterate through processing each node
-    while(open.records.size() > 0)
+    Entity* current = NULL;
+
+    while(openList.size() > 0)
     {
-        // Find the smallest element in the open list
-        current = open.smallestElement();
+        current = getLowestScore(openList);
 
-        // If it is the goal node, terminate
-        if((*current)->node == mGoalTile->getIndex())
+        if(current == mGoalTile)
             break;
 
-        // Otherwise get its outgoing connections 
-        std::vector<std::shared_ptr<Connection>> connections = this->getConnections(&(*current));
-        float currentCost = (*current)->costSoFar;
+        current->state = NodeState::CLOSED;
+        auto neighbors = getValidNodes(current, false);
 
-        // Loop through each connection in turn
-        //for(auto& con : connections)
-        for(auto it = connections.begin(); it != connections.end(); ++it)
+        for(auto& neighbor : neighbors)
         {
-            std::string endNode = (*it)->mToNode;
-            float endNodeCost = currentCost + (*it)->mCost;
-            std::unique_ptr<NodeRecord> endNodeRecord(new NodeRecord());
-
-
-            // Skip if the node is closed
-            if(closed.contains(endNode))
-                continue;
-            // ... or if it is open and we've found a worse route
-            else if(open.contains(endNode))
+            Entity* neigh = NULL;
+            try 
             {
-                // Here we find the record in the open list
-                // corresponding to the endNode.
-                std::vector<std::unique_ptr<NodeRecord>>::iterator it = open.find(endNode);
-                //endNodeRecord = open.find(endNode);
-
-                if((*it)->costSoFar <= endNodeCost)
-                    continue;
-
-                endNodeRecord = std::unique_ptr<NodeRecord>(std::move((*it)));
-
-            // Otherwise we know we've got an unvisited
-            // node, so make a record for it
-            } else {
-                endNodeRecord->node = endNode;
+                neigh = mEntities.at(neighbor).get();
+            }
+            catch(std::out_of_range ex)
+            {
+                continue; 
             }
 
-            // We're here if we need to update the node
-            // Update the cost and connection
-            endNodeRecord->costSoFar = endNodeCost;
-            endNodeRecord->connection = (*it);
+            if(neigh->state == NodeState::CLOSED)
+                continue;
 
-            // And add it to the open list
-            if(!open.contains(endNode))
-                open.records.push_back(std::move(endNodeRecord));
+            if(neigh->state == NodeState::OPEN)
+            {
+                float currentScore = current->costSoFar+1;
+                if(currentScore < neigh->costSoFar)
+                {
+                    neigh->costSoFar = currentScore;
+                    neigh->parent = current;
+                }
+            }
+
+            if(neigh->state == NodeState::UNVISITED)
+            {
+                openList[neigh->getIndex()] = neigh;
+                neigh->costSoFar = current->costSoFar + 1;
+                neigh->parent = current;
+            }
         }
-
-        // We've finished looking at the connections for
-        // the current node, so add it to the closed list
-        // and remove it from the open list
-        closed.records.push_back(std::unique_ptr<NodeRecord>(current->release()));
-        open.records.erase(current);
+        openList.erase(current->getIndex());
     }
 
-    // We're here if we've either found the goal, or
-    // if we've no more nodes to search, find which.
-    if((*current)->node != mGoalTile->getIndex())
+    if(current != mGoalTile)
     {
-        // We've run out of nodes without finding the
-        // goal, so there's no solution
+        // No solution
     } else {
-        // Compile the list of connections in the path
-        std::vector<std::unique_ptr<Connection>> path;
-
-        std::unique_ptr<NodeRecord> traceback(std::move((*current)));
-
-        // Work back along the path, accumulating
-        // connections
-        while(traceback->node != mStartTile->getIndex())
+        while(current != mStartTile)
         {
-            mEntities.at(traceback->node)->setColor(sf::Color::Yellow);
-
-            //path.push_back((*current)->connection);
-            //current = (*current)->connection->mFromNode;
-            traceback = std::unique_ptr<NodeRecord>(std::move((*current)));
+            if(current != mGoalTile)
+            {
+                current->setColor(sf::Color::Yellow);
+                current->isPath = true;
+            }
+            current = current->parent;
         }
     }
 }
 
-std::vector<std::shared_ptr<Connection>> World::getConnections(std::unique_ptr<NodeRecord>* fromNode)
+Entity* World::getLowestScore(std::map<std::string, Entity*> openList)
 {
-    std::vector<std::shared_ptr<Connection>> connections;
-    Entity* current = mEntities.at((*fromNode)->node).get();
-
-    for(auto& neighbor : current->getNeighbors())
+    Entity* result = NULL;
+    for(auto& ent : openList)
     {
-        std::shared_ptr<Connection> con(new Connection(1, fromNode, neighbor));
-        connections.push_back(con);
+        if(result == NULL)
+        {
+            result = ent.second;
+        }
+
+        if(ent.second->costSoFar < result->costSoFar)
+            result = ent.second;
     }
 
-    return connections;
+    return result;
+}
+
+std::vector<std::string> World::getValidNodes(Entity* ent, bool dia)
+{
+    std::vector<std::string> neighbors = ent->getNeighbors(dia);
+
+    std::vector<std::string> valid;
+
+    for(auto& neigh : neighbors)
+    {
+        Entity* ent = NULL;
+
+        try
+        {
+            ent = mEntities.at(neigh).get();
+        }
+        catch (std::out_of_range ex)
+        {
+            continue;
+        }
+        
+        if(!ent->isWall())
+            valid.push_back(neigh);
+    }
+
+    return valid;
+}
+
+void World::resetWorld(int width, int height)
+{
+    mEntities.clear();
+    createWorld(width, height);
+}
+
+void World::clearPath()
+{
+    for(auto& ent : mEntities)
+    {
+        ent.second->costSoFar = 0;
+        ent.second->parent = NULL;
+        ent.second->state = NodeState::UNVISITED;
+
+        if(ent.second->isPath && !ent.second->isWall())
+            ent.second->setColor(NODE_FREE);
+    }
 }

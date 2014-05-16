@@ -46,16 +46,15 @@ void Game::processInput()
     sf::Event event;
     while(mWindow.pollEvent(event))
     {
+        handleInput(event);
+
         if(event.type == sf::Event::Closed)
             mWindow.close();
 
         if(event.type == sf::Event::Resized) {
             mWindow.setView(sf::View(sf::FloatRect(0.f, 0.f, event.size.width, event.size.height)));
-            mWorld.deleteWorld();
-            mWorld.createWorld(event.size.width, event.size.height);
+            mWorld.resetWorld(event.size.width, event.size.height);
         }
-
-        handleInput(event);
     }
 }
 
@@ -63,7 +62,14 @@ void Game::handleInput(sf::Event event)
 {
     // Keyboard Input Stuff
     if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R)
-        mWorld.findPath(Algorithm::DIJKSTRA, Heuristic::NONE);
+        mWorld.findPath(Algorithm::ASTAR, Heuristic::NONE);
+
+    if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
+        mWorld.resetWorld(mWindow.getSize().x, mWindow.getSize().y);
+        
+
+    if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C)
+        mWorld.clearPath();
 
     // Mouse Input Stuff
     sf::Vector2i mousePosition = sf::Mouse::getPosition(mWindow);

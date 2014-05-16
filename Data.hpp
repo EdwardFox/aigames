@@ -34,4 +34,11 @@ enum class Heuristic
     CLUSTER
 };
 
+enum class NodeState
+{
+    UNVISITED,
+    OPEN,
+    CLOSED
+};
+
 #endif

@@ -4,10 +4,10 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <list>
+#include <map>
 #include "Entity.hpp"
 #include "Data.hpp"
-#include "Connection.hpp"
-#include "PathfindingList.hpp"
 
 class World
 {
@@ -40,15 +40,15 @@ class World
         * @param x X coordinate
         * @param y Y coordinate
         */
-        void addEntity(std::string key, sf::Vector2f position, sf::Vector2f size, sf::Color fill, sf::Color outline, bool isStart, bool isEnd);
+        void addEntity(std::string key, sf::Vector2f position, sf::Vector2f size, sf::Color fill, sf::Color outline, bool isStart, bool isEnd, bool isWall);
 
         std::map<std::string, std::unique_ptr<Entity>>& getEntities();
 
         Entity* getEntityAtPosition(int x, int y);
 
         void createWorld(int width, int height);
-
-        void deleteWorld();
+        void resetWorld(int width, int height);
+        void clearPath();
 
         void setStartTile(Entity* ent);
         void setGoalTile(Entity* ent);
@@ -65,8 +65,10 @@ class World
         Entity* mGoalTile;
 
         void runDijkstra();
+        void runAStar(Heuristic heu);
 
-        std::vector<std::shared_ptr<Connection>> getConnections(std::unique_ptr<NodeRecord>* fromNode);        
+        Entity* getLowestScore(std::map<std::string, Entity*> openList);
+        std::vector<std::string> getValidNodes(Entity* ent, bool dia);
 };
 
 #endif
