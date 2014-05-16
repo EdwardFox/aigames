@@ -62,7 +62,8 @@ void Game::processInput()
 void Game::handleInput(sf::Event event)
 {
     // Keyboard Input Stuff
-    
+    if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R)
+        mWorld.findPath(Algorithm::DIJKSTRA, Heuristic::NONE);
 
     // Mouse Input Stuff
     sf::Vector2i mousePosition = sf::Mouse::getPosition(mWindow);
@@ -112,6 +113,7 @@ void Game::handleInput(sf::Event event)
                             previousEnt->setColor(NODE_FREE);
                         }
 
+                        mWorld.setStartTile(ent);
                         ent->setStart(true);
                         ent->setColor(NODE_START);
                         previousEnt = ent;
@@ -131,6 +133,7 @@ void Game::handleInput(sf::Event event)
                             previousEnt->setColor(NODE_FREE);
                         }
 
+                        mWorld.setGoalTile(ent);
                         ent->setEnd(true);
                         ent->setColor(NODE_GOAL);
                         previousEnt = ent;

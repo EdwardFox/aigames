@@ -64,3 +64,43 @@ bool Entity::isStart() {
 bool Entity::isEnd() {
     return end;
 }
+
+std::vector<std::string> Entity::getNeighbors(bool diagonal)
+{
+    std::vector<std::string> neighbors;
+
+    // Top
+    neighbors.push_back(std::to_string((int)mShape.getPosition().x) + "_" + std::to_string((int)mShape.getPosition().y - (int)BOX_SIZE));
+
+    // Top Right
+    if(diagonal)
+        neighbors.push_back(std::to_string((int)mShape.getPosition().x + (int)BOX_SIZE) + "_" + std::to_string((int)mShape.getPosition().y - (int)BOX_SIZE));
+
+    // Right
+    neighbors.push_back(std::to_string((int)mShape.getPosition().x + (int)BOX_SIZE) + "_" + std::to_string((int)mShape.getPosition().y));
+
+    // Right Bottom
+    if(diagonal)
+        neighbors.push_back(std::to_string((int)mShape.getPosition().x + (int)BOX_SIZE) + "_" + std::to_string((int)mShape.getPosition().y + (int)BOX_SIZE));
+
+    // Bottom
+    neighbors.push_back(std::to_string((int)mShape.getPosition().x) + "_" + std::to_string((int)mShape.getPosition().y + (int)BOX_SIZE));
+
+    // Bottom Left
+    if(diagonal)
+        neighbors.push_back(std::to_string((int)mShape.getPosition().x - (int)BOX_SIZE) + "_" + std::to_string((int)mShape.getPosition().y + (int)BOX_SIZE));
+
+    // Left
+    neighbors.push_back(std::to_string((int)mShape.getPosition().x - (int)BOX_SIZE) + "_" + std::to_string((int)mShape.getPosition().y));
+
+    // Left Top
+    if(diagonal)
+        neighbors.push_back(std::to_string((int)mShape.getPosition().x - (int)BOX_SIZE) + "_" + std::to_string((int)mShape.getPosition().y - (int)BOX_SIZE));
+
+    return neighbors;
+}
+
+std::string Entity::getIndex()
+{
+    return (std::to_string((int)mShape.getPosition().x) + "_" + std::to_string((int)mShape.getPosition().y));
+}

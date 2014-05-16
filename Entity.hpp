@@ -2,6 +2,7 @@
 #define ENTITY_HPP
 
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include "Data.hpp"
 
 class Entity
@@ -52,6 +53,10 @@ class Entity
         virtual bool isWall();
         virtual bool isStart();
         virtual bool isEnd();
+
+        virtual std::vector<std::string> getNeighbors(bool diagonal = true);
+
+        virtual std::string getIndex();
 
     protected:
         sf::RectangleShape mShape;

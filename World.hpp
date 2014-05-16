@@ -3,8 +3,11 @@
 
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include <vector>
 #include "Entity.hpp"
 #include "Data.hpp"
+#include "Connection.hpp"
+#include "PathfindingList.hpp"
 
 class World
 {
@@ -47,11 +50,23 @@ class World
 
         void deleteWorld();
 
+        void setStartTile(Entity* ent);
+        void setGoalTile(Entity* ent);
+
+        void findPath(Algorithm alg, Heuristic heu);
+
     private:
         /**
         * @brief 
         */
         std::map<std::string, entPtr> mEntities;
+
+        Entity* mStartTile;
+        Entity* mGoalTile;
+
+        void runDijkstra();
+
+        std::vector<std::shared_ptr<Connection>> getConnections(std::unique_ptr<NodeRecord>* fromNode);        
 };
 
 #endif
