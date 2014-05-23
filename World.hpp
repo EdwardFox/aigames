@@ -144,7 +144,6 @@ class World
         * @brief Pointer to the goal node
         */
         Entity* mGoalNode;
-
 };
 
 #endif

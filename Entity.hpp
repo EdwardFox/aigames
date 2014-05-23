@@ -20,7 +20,7 @@ class Entity
         * @param fill
         * @param outline
         * @param isStart
-        * @param isEndi
+        * @param isGoal
         * @param isWall
         */
         Entity(sf::Vector2f position, sf::Vector2f size, sf::Color fill, sf::Color outline, bool isStart, bool isGoal, bool isWall); 
@@ -96,7 +96,6 @@ class Entity
         * @brief The graphical representation
         */
         sf::RectangleShape mShape;
-
 };
 
 #endif
