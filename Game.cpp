@@ -5,8 +5,9 @@ const sf::Time Game::TimePerFrame = sf::seconds(1.f/60.f);
 Game::Game(int width, int height) :
 mWindow(sf::VideoMode(width, height, 32), "AIGames")
 , mWorld(width, height)
-, inputState(InputState::NONE)
-, previousEnt(NULL)
+, mInputState(InputState::NONE)
+, mPreviousEnt(NULL)
+, mHeuristic(Heuristic::NONE)
 {
     
 }
@@ -36,7 +37,7 @@ void Game::update(sf::Time dt)
 
 void Game::render()
 {
-    mWindow.clear(sf::Color::Blue);
+    mWindow.clear(sf::Color::White);
     mWorld.draw(mWindow);
     mWindow.display();
 }
@@ -62,97 +63,116 @@ void Game::handleInput(sf::Event event)
 {
     // Keyboard Input Stuff
     if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::R)
-        mWorld.findPath(Algorithm::ASTAR, Heuristic::NONE);
-
-    if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::P)
         mWorld.resetWorld(mWindow.getSize().x, mWindow.getSize().y);
+
+    if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::H)
+    {
+        if(mHeuristic == Heuristic::NONE)
+            mHeuristic = Heuristic::EUCLIDEAN;
+        else
+            mHeuristic = Heuristic::NONE;
+
+        mWorld.findPath(mHeuristic);
+    }
         
-
-    if(event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C)
-        mWorld.clearPath();
-
     // Mouse Input Stuff
+    // Get entity at current mouse position
     sf::Vector2i mousePosition = sf::Mouse::getPosition(mWindow);
     Entity* ent = mWorld.getEntityAtPosition(mousePosition.x, mousePosition.y);
 
+    // If we have found an entity, handle the different input states for left clicking
     if(ent != NULL) {
-        //ent->setColor(sf::Color::Green);
-
         if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-            switch(inputState) {
-                case InputState::NONE:
-                    if(ent->isWall())
-                        inputState = InputState::REMOVE;
-                    else
-                        inputState = InputState::ADD;
+            mWorld.findPath(mHeuristic);
 
-                    if(ent->isStart())
-                        inputState = InputState::MOVE_START;
-                    if(ent->isEnd())
-                        inputState = InputState::MOVE_GOAL;
+            switch(mInputState) {
+                // Check which kind of node we have clicked and set state accordingly
+                case InputState::NONE:
+                    if(ent->node.isWall)
+                        mInputState = InputState::REMOVE;
+                    else
+                        mInputState = InputState::ADD;
+
+                    if(ent->node.isStart)
+                        mInputState = InputState::MOVE_START;
+                    if(ent->node.isGoal)
+                        mInputState = InputState::MOVE_GOAL;
                     break;
 
+                // Turn all free nodes into walls
                 case InputState::ADD:
-                    if(!ent->isWall() && !ent->isStart() && !ent->isEnd()) {
-                        ent->setWall(true);
+                    if(!ent->node.isWall && !ent->node.isStart && !ent->node.isGoal) {
+                        ent->node.isWall = true;
                         ent->setColor(NODE_BLOCKED);
                     }
                     break;
 
+                // Turn all walls into free nodes
                 case InputState::REMOVE:
-                    if(ent->isWall() && !ent->isStart() && !ent->isEnd()) {
-                        ent->setWall(false);
+                    if(ent->node.isWall && !ent->node.isStart && !ent->node.isGoal) {
+                        ent->node.isWall = false;
                         ent->setColor(NODE_FREE);
                     }
                     break;
 
+                // Drag the start node around
                 case InputState::MOVE_START:
-                    if(previousEnt == NULL) {
-                        previousEnt = ent;
+                    if(mPreviousEnt == NULL) {
+                        mPreviousEnt = ent;
                     }
 
-                    if(previousEnt != ent && !ent->isEnd()) {
-                        previousEnt->setStart(false);
-                        if(previousEnt->isWall()) {
-                            previousEnt->setColor(NODE_BLOCKED);
+                    // If the current node is not the old node,
+                    // return the old one to its previous state
+                    // and make the new node the start node
+                    if(mPreviousEnt != ent && !ent->node.isGoal) {
+                        mPreviousEnt->node.isStart = false;
+                        if(mPreviousEnt->node.isWall) {
+                            mPreviousEnt->setColor(NODE_BLOCKED);
                         } else {
-                            previousEnt->setColor(NODE_FREE);
+                            mPreviousEnt->setColor(NODE_FREE);
                         }
 
-                        mWorld.setStartTile(ent);
-                        ent->setStart(true);
+                        mWorld.setStartNode(ent);
+                        ent->node.isStart = true;
                         ent->setColor(NODE_START);
-                        previousEnt = ent;
+                        mPreviousEnt = ent;
                     }
                     break;
 
+                // Drag the goal node around
                 case InputState::MOVE_GOAL:
-                    if(previousEnt == NULL) {
-                        previousEnt = ent;
+                    if(mPreviousEnt == NULL) {
+                        mPreviousEnt = ent;
                     }
 
-                    if(previousEnt != ent && !ent->isStart()) {
-                        previousEnt->setEnd(false);
-                        if(previousEnt->isWall()) {
-                            previousEnt->setColor(NODE_BLOCKED);
+                    // If the current node is not the old node
+                    // return the old one to its previous state
+                    // and make the new node the goal node
+                    if(mPreviousEnt != ent && !ent->node.isStart) {
+                        mPreviousEnt->node.isGoal = false;
+                        if(mPreviousEnt->node.isWall) {
+                            mPreviousEnt->setColor(NODE_BLOCKED);
                         } else {
-                            previousEnt->setColor(NODE_FREE);
+                            mPreviousEnt->setColor(NODE_FREE);
                         }
 
-                        mWorld.setGoalTile(ent);
-                        ent->setEnd(true);
+                        mWorld.setGoalNode(ent);
+                        ent->node.isGoal = true;
                         ent->setColor(NODE_GOAL);
-                        previousEnt = ent;
+                        mPreviousEnt = ent;
                     }
                     break;
 
+                // Reset state
                 default:
-                    inputState = InputState::NONE;
+                    mInputState = InputState::NONE;
                     break;
             }
+
+        // Reset state and previous entity if we are not clicking
         } else {
-            inputState = InputState::NONE;
-            previousEnt = NULL;
+            mInputState = InputState::NONE;
+            mPreviousEnt = NULL;
         }
     }
 }

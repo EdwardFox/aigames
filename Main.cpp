@@ -1,7 +1,7 @@
 #include <cstring>
 #include "Game.hpp"
 
-void processParameters(int argc, char* argv[], int& width, int& height) 
+void processParameters(const int argc, char* argv[], int& width, int& height) 
 {
     for(int i = 1; i < argc; ++i) 
     {

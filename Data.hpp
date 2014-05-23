@@ -21,12 +21,6 @@ enum class InputState
     MOVE_GOAL
 };
 
-enum class Algorithm
-{
-    DIJKSTRA,
-    ASTAR
-};
-
 enum class Heuristic
 {
     NONE,

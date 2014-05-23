@@ -1,38 +1,39 @@
 #include "Entity.hpp"
 
 Entity::Entity() :
-state(NodeState::UNVISITED)
-, parent(NULL)
-, costSoFar(0)
-, isPath(false)
+node()
 , mShape()
-, wall(false)
-, start(false)
-, end(false)
 {
+    node.state = NodeState::UNVISITED;
+    node.parent = NULL;
+    node.costSoFar = 0;
+    node.isPath = false;
+    node.isWall = false;
+    node.isStart = false;
+    node.isGoal = false;
 }
 
     
-Entity::Entity(const sf::Vector2f position, const sf::Vector2f size, const sf::Color fill, const sf::Color outline, bool isStart, bool isEnd, bool isWall) {
+Entity::Entity(sf::Vector2f position, sf::Vector2f size, sf::Color fill, sf::Color outline, bool isStart, bool isGoal, bool isWall) {
     mShape.setSize(size);
     mShape.setPosition(position.x, position.y);
     mShape.setFillColor(fill);
     mShape.setOutlineColor(outline);
     mShape.setOutlineThickness(1.0f);
 
-    state = NodeState::UNVISITED;
-    parent = NULL;
-    costSoFar = 0;
-    isPath = false;
+    node.state = NodeState::UNVISITED;
+    node.parent = NULL;
+    node.costSoFar = 0;
+    node.isPath = false;
 
-    setWall(isWall);
-    setStart(isStart);
-    setEnd(isEnd);
+    node.isWall = isWall;
+    node.isStart = isStart;
+    node.isGoal = isGoal;
 
     if(isStart)
         setColor(NODE_START);
 
-    if(isEnd)
+    if(isGoal)
         setColor(NODE_GOAL);
 }
 
@@ -41,7 +42,7 @@ void Entity::update(sf::Time dt)
 
 }
 
-void Entity::draw(sf::RenderTarget &target) 
+void Entity::draw(sf::RenderTarget &target) const
 {
     target.draw(mShape);
 }
@@ -51,31 +52,12 @@ void Entity::setColor(sf::Color c)
     mShape.setFillColor(c);
 }
 
-void Entity::setWall(bool w) {
-    wall = w;
+void Entity::setBorderColor(sf::Color c)
+{
+    mShape.setOutlineColor(c);
 }
 
-void Entity::setStart(bool s) {
-    start = s;
-}
-
-void Entity::setEnd(bool e) {
-    end = e;
-}
-
-bool Entity::isWall() {
-    return wall;
-}
-
-bool Entity::isStart() {
-    return start;    
-}
-
-bool Entity::isEnd() {
-    return end;
-}
-
-std::vector<std::string> Entity::getNeighbors(bool diagonal)
+std::vector<std::string> Entity::getNeighbors(bool diagonal) const
 {
     std::vector<std::string> neighbors;
 
@@ -113,4 +95,9 @@ std::vector<std::string> Entity::getNeighbors(bool diagonal)
 std::string Entity::getIndex()
 {
     return (std::to_string((int)mShape.getPosition().x) + "_" + std::to_string((int)mShape.getPosition().y));
+}
+
+sf::Vector2f Entity::getPosition() const
+{
+    return mShape.getPosition();
 }

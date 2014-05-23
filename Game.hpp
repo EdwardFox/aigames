@@ -1,12 +1,32 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
-#include <SFML/Graphics.hpp>
 #include "World.hpp"
 #include "Data.hpp"
 
 class Game
 {
+    public:
+        /**
+         * @brief Default constructor
+         */
+        Game(int width, int height);
+
+        /**
+         * @brief Entry point for the game to run
+         */
+        void run();
+
+        /**
+         * @brief Renders all the elements on the screen
+         */
+        void render();
+
+        /**
+         * @brief Defines how many updates per second are made
+         */
+        static const sf::Time TimePerFrame;
+
     private:
         /**
         * @brief Updates the game
@@ -28,23 +48,6 @@ class Game
         */
         void handleInput(sf::Event event);
 
-    public:
-        /**
-        * @brief Default constructor
-        */
-        Game(int width, int height);
-
-        /**
-        * @brief Entry point for the game to run
-        */
-        void run();
-
-        /**
-        * @brief Renders all the elements on the screen
-        */
-        void render();
-
-    private:
         /**
         * @brief The SFML window
         */
@@ -55,15 +58,20 @@ class Game
         */
         World mWorld;
 
-        InputState inputState;
-
-        Entity* previousEnt;
-
-    public:
         /**
-        * @brief Defines how many updates per second are made
+        * @brief Tracks the current input state to handle adding/removing blocks etc.
         */
-        static const sf::Time TimePerFrame;
+        InputState mInputState;
+
+        /**
+        * @brief Tracks the previous entity when moving goal / start nodes
+        */
+        Entity* mPreviousEnt;
+
+        /**
+        * @brief Keep track of current heuristic to toggle inbetween
+        */
+        Heuristic mHeuristic;
 };
 
 #endif
